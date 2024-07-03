@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign In</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-KK94CHFLLe+nY2dmCWGMq91rCGa5gtU4mk92HdvYe+M/SXH301p5ILy+dN9+nJOZ" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe" crossorigin="anonymous"></script>
+    <style>
+        .register .newuser{
+            /* margin-top: 20px; */
+            vertical-align: bottom;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container p-3 mx-auto w-50 form-box my-5 rounded-md">
+        <h2 class="text-center mb-3">Login</h2>
+        <form id="loginForm"  class="p-2">
+            <div class="mb-3">
+                <div class="input-group">
+                    <span class="input-group-text">Email</span>
+                    <input required name="email" type="email" class="form-control" placeholder="Enter your email">
+                </div>
+            </div>
+            <div class="mb-3">
+                <div class="input-group">
+                    <span class="input-group-text">Password</span>
+                    <input required name="password" type="password" class="form-control" placeholder="Enter your password">
+                </div>
+            </div>
+            <div class="alert alert-danger align-items-center " role="alert" id="alertMsg" style="display: none"></div>
+
+            <button type="submit" class="btn btn-md mt-2 bg-danger">Login</button>
+           <div class="register"><a href="" class="newuser">new user?</a><a href="/register" class="btn btn-md mt-2 bg-danger">Register Here</a>
+            </div>
+        </form>
+    </div>
+    <script src="http://localhost:3000/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io.connect('http://localhost:3000');
+        document.getElementById('loginForm').addEventListener('submit', async function(event) {
+            event.preventDefault();
+            const email = event.target.email.value;
+            const password = event.target.password.value;
+            try {
+                const response = await fetch('/api/users/signin', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ email, password })
+                });
+                
+                const data = await response.json();
+                console.log(data);
+                if (response.ok) {
+                    localStorage.setItem('token', data.token);
+                    localStorage.setItem('user', JSON.stringify(data.user));
+                    window.location.href = '/chat';
+                } else {
+                    
+
+                    alert('Login failed');
+                }
+            } catch (err) {
+                console.error('Error:', err);
+                let alertmsg = document.getElementById('alertMsg');
+                    alertmsg.textContent = 'Email or password incorrect';
+                    alertmsg.style.display='block';
+            }
+        });
+    </script>
+</body>
+</html>

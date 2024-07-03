@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chatter App</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+
+        .chat-box {
+            height: 400px;
+            overflow-y: scroll;
+        }
+
+        .chat-message {
+            display: flex;
+            align-items: flex-end;
+            margin-bottom: 15px;
+        }
+
+        .message-content {
+            padding: 10px;
+            border-radius: 10px;
+            background-color: hsla(131, 88%, 65%, 0.446);
+            flex-grow: 1;
+            margin-left: 10px;
+        }
+
+        .user-message .message-content {
+            background-color: #d4edda;
+        }
+
+        .user {
+            font-weight: bold;
+        }
+
+        .message-time {
+            font-size: 0.85rem;
+        }
+
+        .card-footer {
+            position: relative;
+        }
+
+        .card-footer input {
+            width: calc(100% - 80px);
+            display: inline-block;
+        }
+
+        .image {
+            width: 3rem;
+            height: 3rem;
+            border-radius: 50%;
+            overflow: hidden;
+        }
+
+        .image img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+        }
+
+        .card-footer button {
+            width: 70px;
+            display: inline-block;
+            position: absolute;
+            right: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <div class="row">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header bg-success text-white">
+                        <span class="welcomemsg"></span>
+                        <span class="float-right typing"></span>
+                    </div>
+                    <div class="card-body chat-box" id="chatBox">
+                    </div>
+                    <div class="card-footer">
+                        <form id="chat-form">
+                            <input type="text" id="chat-input" class="form-control" placeholder="Enter your message...">
+                            <button type="submit" class="btn btn-success mt-2 float-right">Send</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header connected bg-primary text-white">
+                    </div>
+                    <div class="card-body">
+                        <div class="notification" id="notification-box"></div>
+                        <ul class="list-group">
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="http://localhost:3000/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io.connect('http://localhost:3000');
+        const user = JSON.parse(localStorage.getItem('user'));
+        console.log(user);
+
+        socket.emit('userConnected', user);
+        
+        function scrollChatToBottom() {
+            const chatBox = document.getElementById('chatBox');
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        socket.on('welcome', (message) => {
+            const welcomeMsg = document.querySelector('.welcomemsg');
+            welcomeMsg.innerText = message.message;
+            scrollChatToBottom();
+        });
+
+        socket.on('previousMessages', (messages) => {
+            const chatContainer = document.getElementById('chatBox');
+            messages.forEach(message => {
+                const chatMessage = document.createElement('div');
+                chatMessage.classList.add('chat-message');
+
+                const userImage = document.createElement('div');
+                userImage.classList.add('image');
+                const img = document.createElement('img');
+                img.src = message.imageUrl;
+                img.alt = '';
+                userImage.appendChild(img);
+
+                const messageContent = document.createElement('div');
+                messageContent.classList.add('message-content');
+                if (message.username === user.name) {
+                    messageContent.style.backgroundColor = '#cfcd55';
+                }
+
+                const userName = document.createElement('strong');
+                userName.classList.add('user');
+                userName.innerText = message.username;
+
+                const messageTime = document.createElement('span');
+                messageTime.classList.add('message-time', 'float-right');
+                messageTime.innerText = new Date(message.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+                const messageText = document.createElement('div');
+                messageText.classList.add('message-text');
+                messageText.innerText = message.text;
+
+                messageContent.appendChild(userName);
+                messageContent.appendChild(messageTime);
+                messageContent.appendChild(messageText);
+
+                chatMessage.appendChild(userImage);
+                chatMessage.appendChild(messageContent);
+
+                chatContainer.appendChild(chatMessage);
+            });
+            scrollChatToBottom();
+        });
+
+        socket.on('updateUserList', (users) => {
+            const userList = document.querySelector('.list-group');
+            userList.innerHTML = '';
+            users.forEach(user => {
+                const li = document.createElement('li');
+                li.classList.add('list-group-item');
+                li.innerText = user.name;
+                userList.appendChild(li);
+            });
+            scrollChatToBottom();
+        });
+
+        socket.on('userNumber', (connectedUser) => {
+            const allUsers = document.querySelector(".connected");
+            allUsers.innerText = `Connected users ${connectedUser.connectedUser}`;
+            scrollChatToBottom();
+        });
+
+        socket.on('disconnects', (message) => {
+            const welcomeMsg = document.getElementById('notification-box');
+            welcomeMsg.innerText = message.message;
+            welcomeMsg.style.display = 'block';
+            welcomeMsg.style.backgroundColor = 'red';
+            welcomeMsg.style.padding = '1rem';
+            welcomeMsg.style.marginBottom = '1rem';
+            welcomeMsg.style.color = 'white';
+            scrollChatToBottom();
+        });
+
+        socket.on('broadcast_message', (userMessage) => {
+            console.log(userMessage);
+            console.log(userMessage.image);
+            const chatContainer = document.getElementById('chatBox');
+            const chatMessage = document.createElement('div');
+            chatMessage.classList.add('chat-message');
+
+            const userImage = document.createElement('div');
+            userImage.classList.add('image');
+            const img = document.createElement('img');
+            img.src = userMessage.image;
+            img.alt = '';
+            userImage.appendChild(img);
+
+            const messageContent = document.createElement('div');
+            messageContent.classList.add('message-content');
+            if (userMessage.username === user.name) {
+                messageContent.style.backgroundColor = '#cfcd55';
+            }
+
+            const userName = document.createElement('strong');
+            userName.classList.add('user');
+            userName.innerText = userMessage.username;
+
+            const messageTime = document.createElement('span');
+            messageTime.classList.add('message-time', 'float-right');
+            messageTime.innerText = new Date(userMessage.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+            const messageText = document.createElement('div');
+            messageText.classList.add('message-text');
+            messageText.innerText = userMessage.message;
+
+            messageContent.appendChild(userName);
+            messageContent.appendChild(messageTime);
+            messageContent.appendChild(messageText);
+
+            chatMessage.appendChild(userImage);
+            chatMessage.appendChild(messageContent);
+
+            chatContainer.appendChild(chatMessage);
+            scrollChatToBottom();
+        });
+
+        let typing = false;
+        let timeout;
+
+        document.getElementById('chat-input').addEventListener('input', (e) => {
+            if (!typing) {
+                typing = true;
+                socket.emit('typing', user);
+            }
+            clearTimeout(timeout);
+            timeout = setTimeout(() => {
+                typing = false;
+                socket.emit('typing', { name: '' }); // Clear typing status
+            }, 1000);
+        });
+
+        socket.on('typing', (typingUser) => {
+            const typingIndicator = document.querySelector('.typing');
+            console.log(typingUser.name === user.name);
+            console.log(typingUser.name === '');
+            if (typingUser.name === user.name || typingUser.name === '') {
+                typingIndicator.innerText = '';
+            } else {
+                typingIndicator.innerText = `${typingUser.name} is typing...`;
+            }
+        });
+
+        document.getElementById('chat-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const chatInput = document.getElementById('chat-input');
+            
+            const message = chatInput.value;
+            const chatContainer = document.getElementById('chatBox');
+            const chatMessage = document.createElement('div');
+            chatMessage.classList.add('chat-message');
+
+            const userImage = document.createElement('div');
+            userImage.classList.add('image');
+            const img = document.createElement('img');
+            img.src = user.imageUrl;
+            img.alt = '';
+            userImage.appendChild(img);
+
+            const messageContent = document.createElement('div');
+            messageContent.classList.add('message-content');
+            if (user.name) {
+                messageContent.style.backgroundColor = '#cfcd55';
+            }
+
+            const userName = document.createElement('strong');
+            userName.classList.add('user');
+            userName.innerText = user.name;
+
+            const messageTime = document.createElement('span');
+            messageTime.classList.add('message-time', 'float-right');
+            messageTime.innerText = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+            const messageText = document.createElement('div');
+            messageText.classList.add('message-text');
+            messageText.innerText = message;
+
+            messageContent.appendChild(userName);
+            messageContent.appendChild(messageTime);
+            messageContent.appendChild(messageText);
+
+            chatMessage.appendChild(userImage);
+            chatMessage.appendChild(messageContent);
+
+            chatContainer.appendChild(chatMessage);
+            scrollChatToBottom();
+        
+            console.log(message);
+            console.log(user.imageUrl);
+            const userMessage = { userid: user._id, username: user.name, message, image: user.imageUrl };
+            socket.emit('chatMessage', userMessage);
+
+            chatInput.value = '';
+            chatInput.focus();
+        });
+    </script>
+</body>
+</html>

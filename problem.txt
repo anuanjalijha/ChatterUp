@@ -1,0 +1,70 @@
+Objective
+
+The aim of the ChatterUp project is to create an interactive real-time chat application, facilitating seamless communication and interaction between users. This application will be built using Node.js, ExpressJS. Socket.io, and MongoDB to provide a robust and engaging chat experience.
+▼ Acceptance criteria
+Socket-Based Architecture
+The ChatterUp application will utilize the power of WebSockets through the Socket.io library, enabling real-time, bidirectional communication between users.
+
+Code Modularity
+The project will follow modern development practices by employing ES6 Modules for code organization, ensuring maintainability, and making it easier for developers to collaborate.                                                                                    User-Friendly Chat Ul
+The chat user interface will be carefully designed to enhance the user experience. It will be created using a combination of HTML, CSS, and JavaScript or any modern front-end framework such as React or Angular. The Ul will feature components for seamless chatting and a notification panel displaying online users.
+
+User Onboarding
+When a user joins ChatterUp for the first time, they will be prompted to provide their name, and a warm welcome message will be displayed in the header with their name.
+
+Chat History and User Count
+Newly joined users will have access to the chat history, enabling them to catch up on previous conversations. Users will also receive real-time information about how many others have already joined the chat.
+
+Broadcasting Messages and Database Storage
+Messages sent by users will be broadcasted to all connected users in real-time. Simultaneously, these messages will be securely stored in the database for future reference and retrieval.                                                                               User Typing Indicators
+As users type messages, a 'typing..' indicator will be displayed to all connected users, indicating which user is currently typing. The indicator will disappear once the user finishes typing or clicks outside the input box.
+
+Notification of New User Joins
+When a new user joins the application, their name will be added to the notification panel, marked with an online symbol (a green dot). All connected users will be notified of this addition, fostering a sense of community.
+
+Notification of User Disconnections
+Whenever a user leaves the application, the notification panel will be updated to reflect the remaining connected users, and the name of the disconnected user will be removed.
+Profile Pictures for User Consistency
+Each user will have an associated profile picture displayed throughout their conversation, providing a consistent visual identity for users.
+
+Displaying Chat Messages
+For a comprehensive chat experience, chat messages will display the user's name, profile picture, message content, and the time of posting. This information will be visible to all connected users                                                   Tasks:
+Follow these steps to build the ChatterUp project.
+
+Project Setup
+Set up an Express.js application and configure the necessary settings.
+Initialize a MongoDB database (use mongoDB on cloud) to store chat messages and user data.
+
+Dependency Installation
+Install the required project dependencies, including Node.js, Express.js. Socket.io, and Mongoose.                                                                                    User Interface Development
+Create a user-friendly chat user interface using HTML, CSS, and JavaScript or a modern front-end framework (e.g.. React, Angular).
+Design and integrate components for chatting and a notification panel displaying online users.
+Ensure the Ul is responsive and visually appealing.
+
+User Onboarding
+Develop a user onboarding process where new users provide their name and display a welcome message.
+Use front-end forms to collect user input and provide a smooth onboarding experience.                                                                                                            Chat History and User Count
+Enable new users to access chat history, allowing them to catch up on previous conversations.
+Implement real-time updates for the count of users who have joined the chat
+
+User Typing Indicators
+Utilize Socketio to broadcast 'typing...' events to connected users. Implement front-end logic to display and remove typing indicators as users start and finish typing.                                                                                                               Broadcasting Messages and Database Storage
+Implement real-time message broadcasting to all connected users.
+Ensure that messages are securely stored in the database for future retrieval.
+
+Notification of New User Joins
+Design the notification panel to update in real-time when a new user joins the chat.
+Use Socketio to broadcast notifications of new user joins in real-time.                             Notification of User Disconnections
+Use Socket.io to broadcast user disconnection events in real-time
+
+Profile Pictures
+You can store default profile pictures and consistently display them for a user.
+
+Displaying Chat Messages
+Create templates for chat message display, including the user's name, profile picture, message content, and timestamp.
+Use front-end components to render messages for all connected users.           
+
+▼ API Structure
+The API structure for ChatterUp includes:
+Rendering the Ul (eg: "http://localhost:3000/"): The project will render the user interface (HTML page) on a specified port.                                                                              
+
